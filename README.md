@@ -1,6 +1,6 @@
 # Introducing: EVA
 
-EVA (Emotional Variance Assistant) is a web-based assessment that evaluates a subject’s alignment with an institutional definition of emotional stability.
+EVA (Emotional Variance Assistant) is a web-based 15-question assessment that evaluates a subject’s alignment with an institutional definition of emotional stability.
 
 All further explanation is intentionally vague.
 
@@ -31,3 +31,7 @@ Each question offers four responses, ordered from:
 A — most aligned
 
 D — least aligned
+
+# How to use EVA
+
+Take your [EVA Assessment](https://DaelenWall.github.io/eva) today!
