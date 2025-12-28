@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { EVA_QUESTIONS, type ChoiceKey } from "../eva/questions";
 import { scoreEva } from "../eva/score";
 
@@ -13,6 +13,7 @@ export default function EvaAssessment() {
 
     const [answers, setAnswers] = useState<Record<number, ChoiceKey>>({});
     const [submitted, setSubmitted] = useState(false);
+    const [processed, setProcessed] = useState(false);
 
     const total = EVA_QUESTIONS.length;
     const answeredCount = useMemo(() => Object.keys(answers).length, [answers]);
@@ -30,10 +31,14 @@ export default function EvaAssessment() {
 
     return (
         <div style={{ maxWidth: 820, margin: "40px auto", padding: 16, fontFamily: "system-ui, -apple-system, Segoe UI, Roboto, Arial" }}>
-            <h1 style={{ marginBottom: 6 }}>EVA™ — Emotional Variance Assessment</h1>
-            <div style={{ opacity: 0.85, marginBottom: 18 }}>
-                <div><strong>Instructions:</strong> Select the response you most clearly align with. There is no neutral option. We ask that you do not revise your answers.</div>
-            </div>
+            <h1 style={{ marginBottom: 6 }}>EVA™ — Emotional Variance Assistant</h1>
+            {!submitted && (
+                <div style={{ opacity: 0.85, marginBottom: 18 }}>
+                    <div>
+                        <strong>Instructions:</strong> Select the response you most clearly align with. There is no neutral option. We ask that you do not revise your answers.
+                    </div>
+                </div>
+            )}
 
             {!submitted && (
                 <div style={{ marginBottom: 18 }}>
@@ -108,7 +113,7 @@ export default function EvaAssessment() {
                                                 checked={checked}
                                                 onChange={() => onSelect(q.id, k)}
                                             />
-                                            <span><strong>{k})</strong> {q.choices[k]}</span>
+                                            <span><strong>{k}</strong> {q.choices[k]}</span>
                                         </label>
                                     );
                                 })}
@@ -140,7 +145,9 @@ export default function EvaAssessment() {
                 </form>
             ) : (
                 <div style={{ border: "1px solid #ddd", borderRadius: 12, padding: 16 }}>
-                    <h2 style={{ marginTop: 0 }}>STATUS: PROCESSED</h2>
+                    <h2 style={{ marginTop: 0 }}>
+                        STATUS: {processed ? "PROCESSED" : "AWAITING PROCESSING"}
+                    </h2>
 
                     <div style={{ display: "grid", gap: 6, marginBottom: 12 }}>
                         <div><strong>EVA Index:</strong> {result!.index}</div>
@@ -163,63 +170,69 @@ export default function EvaAssessment() {
                             onClick={() => {
                                 setSubmitted(false);
                                 setAnswers({});
+                                setProcessed(false);
                             }}
                             style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #111", background: "#000000ff", cursor: "pointer", fontWeight: 700 }}
                         >
                             Reset
                         </button>
-                        <button
-                            type="button"
-                            onClick={() => {
-                                const submissionString = toSubmissionString(answers);
+                        {!processed && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setTimeout(() => {
+                                        setProcessed(true);
+                                    }, 5000);
 
-                                const endpoint =
-                                    "https://script.google.com/macros/s/AKfycbxNJYBKMwSxbsCeaO2dtnPpbzM2dbdXR869FlouVOX1TWJEwzTXg5AOkijtvGflw9f4/exec";
+                                    const submissionString = toSubmissionString(answers);
 
-                                const body = new URLSearchParams({
-                                    firstName: firstName.trim(),
-                                    surname: surname.trim(),
-                                    index: String(result!.index),
-                                    percentile: String(result!.percentile),
-                                    classification: result!.classification,
-                                    submission: submissionString,
-                                    userAgent: navigator.userAgent,
-                                });
+                                    const endpoint =
+                                        "https://script.google.com/macros/s/AKfycbxNJYBKMwSxbsCeaO2dtnPpbzM2dbdXR869FlouVOX1TWJEwzTXg5AOkijtvGflw9f4/exec";
 
-                                fetch(endpoint, {
-                                    method: "POST",
-                                    mode: "no-cors",
-                                    headers: {
-                                        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-                                    },
-                                    body,
-                                })
-
-                                    .then(() => {
-                                        alert("Status: Processed");
-                                    })
-                                    .catch(() => {
-                                        alert("Processed with warnings.");
+                                    const body = new URLSearchParams({
+                                        firstName: firstName.trim(),
+                                        surname: surname.trim(),
+                                        index: String(result!.index),
+                                        percentile: String(result!.percentile),
+                                        classification: result!.classification,
+                                        submission: submissionString,
+                                        userAgent: navigator.userAgent,
                                     });
-                            }}
-                            style={{
-                                padding: "10px 14px",
-                                borderRadius: 10,
-                                border: "1px solid #000000ff",
-                                background: "#000000ff",
-                                color: "#fff",
-                                cursor: "pointer",
-                                fontWeight: 700,
-                            }}
-                        >
-                            Complete Processing
-                        </button>
+
+                                    fetch(endpoint, {
+                                        method: "POST",
+                                        mode: "no-cors",
+                                        headers: {
+                                            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                                        },
+                                        body,
+                                    })
+                                        .then(() => {
+                                            alert("Status: Processed");
+                                        })
+                                        .catch(() => {
+                                            alert("Processed with warnings.");
+                                        });
+                                }}
+                                style={{
+                                    padding: "10px 14px",
+                                    borderRadius: 10,
+                                    border: "1px solid #000000ff",
+                                    background: "#000000ff",
+                                    color: "#fff",
+                                    cursor: "pointer",
+                                    fontWeight: 700,
+                                }}
+                            >
+                                Complete Processing
+                            </button>
+                        )}
+
+
+
+
                     </div>
 
-
-
-                </div>
-            )}
-        </div>
-    );
+                </div>)}
+        </div>)
 }

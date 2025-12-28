@@ -156,7 +156,7 @@ const dimPairs: [Dim, number][] = [
 
 dimPairs.sort((a, b) => b[1] - a[1]);
 
-const [topDim, topVal] = dimPairs[0];
+const [] = dimPairs[0];
 
   // If very high index but low verification, call it out (rare but interesting)
   if (index >= 80 && verification < 0.35) {
